@@ -1,0 +1,62 @@
+# .github/workflows/deploy.yml
+name: Artifact
+
+on:
+  workflow_call:
+
+env:
+  MIX_ENV: prod
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push-to-ghcr:
+    name: Artifact
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build Docker image
+        env:
+          CONTAINER_REGISTRY: ghcr.io/${{ github.repository_owner }}
+          IMAGE_NAME: ghcr.io/${{ github.repository }}
+          SHA: ${{ github.sha }}
+          APP_NAME: ${{ github.event.repository.name }}
+        run: |
+          DATE_TIME=$(date +"%Y%m%d%H%M%S%3N")
+          IMAGE_TAG=$(date +"%Y%m%d%H%M")
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          VERSION_HASH="${IMAGE_TAG}${COMMIT_HASH}"
+          APP_VERSION="${DATE_TIME}${COMMIT_HASH}"
+
+          echo "Building Docker image for $APP_NAME..."
+          docker build \
+            --build-arg SHA=${SHA} \
+            --build-arg APP_NAME=${APP_NAME} \
+            --build-arg VERSION_HASH=${VERSION_HASH} \
+            --build-arg APP_VERSION=${APP_VERSION} \
+            --build-arg MIX_ENV=prod \
+            --target runner \
+            -t ${IMAGE_NAME}:${VERSION_HASH} \
+            -t ${IMAGE_NAME}:latest \
+            -f ./Dockerfile ./.
+
+      - name: Push Docker images to GHCR
+        env:
+          IMAGE_NAME: ghcr.io/${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          echo "Pushing Docker image to GHCR..."
+          docker push $IMAGE_NAME:latest
+
+      - name: Deployment Summary
+        run: |
+          echo "Image pushed successfully:"
+          echo "- ghcr.io/${{ github.repository }}:latest"

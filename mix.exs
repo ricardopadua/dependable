@@ -42,7 +42,7 @@ defmodule Dependable.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:cloak_ecto, "~> 1.3"},
       {:oban, "~> 2.19.2"},
-      {:jason, "~> 1.4"},
+      {:jason, "~> 1.4"}
     ]
   end
 

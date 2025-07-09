@@ -1,0 +1,25 @@
+name: Audit
+
+on:
+  workflow_call:
+
+env:
+  MIX_ENV: test
+
+jobs:
+  build:
+    name: Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: '27.3'
+          elixir-version: '1.18.4'
+
+      - uses: ./.github/actions/setup-elixir
+
+      - name: Run Hex Audit
+        run: mix hex.audit

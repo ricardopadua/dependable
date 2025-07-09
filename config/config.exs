@@ -11,7 +11,7 @@ config :logger, :console,
 # Configure the jobs processing lib, Oban
 crontab = [
   # each 5 minutes every days
-  {"*/5 * * * *", Dependable.Outbox, args: %{}},
+  {"*/5 * * * *", Dependable.Outbox, args: %{}}
 ]
 
 config :dependable, Oban,
@@ -23,7 +23,7 @@ config :dependable, Oban,
     {Oban.Plugins.Cron, crontab: crontab}
   ],
   queues: [
-    default: 15,
+    default: 15
   ]
 
 config :dependable, Dependable.Vault,
