@@ -21,3 +21,9 @@ dependable-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+/.fetch
+*.beam
+/config/*.secret.exs
+.elixir_ls/
+.env
