@@ -4,25 +4,54 @@ defmodule Dependable.MixProject do
   def project do
     [
       app: :dependable,
-      version: "0.1.0",
+      version: "0.1.21",
       elixir: "~> 1.18",
+      elixirc_paths: elixirc_paths(Mix.env()),
+      build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      release: release(),
+      deps: deps(),
+      aliases: aliases(),
+      maintainers: ["Ricardo Pádua <ricardopadua@gmail.com>"]
     ]
   end
 
-  # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      mod: {Dependable.Application, []},
+      extra_applications: extra_applications(Mix.env())
     ]
   end
 
-  # Run "mix help deps" to learn about dependencies.
+  defp elixirc_paths(_), do: ["lib"]
+  defp extra_applications(_), do: [:logger]
+
+  defp release do
+    [
+      dependable: [
+        steps: [:assemble, :tar],
+        include_executables_for: [:unix],
+        applications: [dependable: :permanent]
+      ]
+    ]
+  end
+
   defp deps do
     [
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
+      {:ecto_sql, "~> 3.10"},
+      {:postgrex, ">= 0.0.0"},
+      {:cloak_ecto, "~> 1.3"},
+      {:oban, "~> 2.19.2"},
+      {:jason, "~> 1.4"},
+    ]
+  end
+
+  defp aliases do
+    [
+      setup: ["deps.get", "ecto.setup"],
+      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+      "ecto.reset": ["ecto.drop", "ecto.setup"],
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
     ]
   end
 end
