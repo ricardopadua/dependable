@@ -1,0 +1,24 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+
+permissions:
+  contents: read
+  packages: write     
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+
+  test:
+    uses: ./.github/workflows/test.yml
+    needs: build
+
+  audit:
+    uses: ./.github/workflows/audit.yml
+    needs: test
+
+  artifact:
+    uses: ./.github/workflows/artifact.yml
+    needs: audit

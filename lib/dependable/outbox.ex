@@ -22,7 +22,7 @@ defmodule Dependable.Outbox do
 
   """
 
-    @unique_period [
+  @unique_period [
     period: 4 * 60 * 60,
     keys: [:rebilling, :target, :tenant],
     states: Oban.Job.states()
@@ -34,7 +34,6 @@ defmodule Dependable.Outbox do
     priority: 0,
     tags: ["outbox"],
     unique: @unique_period
-
 
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"id" => id, "event" => event, "payload" => _payload}}) do

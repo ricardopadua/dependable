@@ -1,0 +1,34 @@
+name: Setup Elixir Environment
+description: Cache, install and compile Elixir dependencies
+runs:
+  using: "composite"
+  steps:
+    - name: Cache mix files
+      uses: actions/cache@v3
+      with:
+        path: ~/.mix
+        key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+
+    - name: Cache deps
+      uses: actions/cache@v3
+      with:
+        path: deps
+        key: ${{ runner.os }}-deps-${{ hashFiles('**/mix.lock') }}
+        restore-keys: ${{ runner.os }}-deps-
+
+    - name: Cache build
+      uses: actions/cache@v3
+      with:
+        path: _build
+        key: ${{ runner.os }}-build-${{ hashFiles('**/mix.lock') }}
+        restore-keys: ${{ runner.os }}-build-
+
+    - name: Install dependencies
+      run: mix deps.get
+      shell: bash
+
+    - name: Compile dependencies
+      run: mix deps.compile
+      shell: bash
+
+
