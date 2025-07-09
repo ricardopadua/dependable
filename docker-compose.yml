@@ -1,0 +1,54 @@
+services:
+  db:
+    image: 'postgres:13.0-alpine' 
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: dependable
+      PGDATA: /tmp
+    hostname: db
+    ports:
+      - ":5432"
+    networks:
+      - dependable
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - './docker/postgres/data:/var/lib/postgresql/data'
+      
+  dependable:
+    build: 
+      context: .
+      target: builder
+      dockerfile: Dockerfile 
+      args: 
+        MIX_ENV: dev
+        APP_NAME: dependable
+    image: dependable:dev
+    volumes: 
+      - .:/app
+    command: mix run --no-halt
+    container_name: dependable
+    hostname: dependable
+    depends_on:
+      - db
+    deploy:
+      resources:
+        limits:
+          memory: 6g
+          cpus: "6"
+        reservations:
+          memory: 3g  
+          cpus: "3"
+    networks:
+      - dependable
+
+networks:
+  dependable:
+    driver: bridge
