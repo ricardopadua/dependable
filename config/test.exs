@@ -14,5 +14,12 @@ config :dependable, Dependable.Repo,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: String.to_integer(System.get_env("POOL_SIZE", "2"))
 
+config :dependable, Oban,
+  repo: Dependable.Repo,
+  plugins: false,
+  queues: [
+    default: 15
+  ]
+
 # Print only warnings and errors during test
 config :logger, level: :warning

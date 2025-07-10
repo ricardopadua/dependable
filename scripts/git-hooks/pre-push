@@ -1,0 +1,47 @@
+#!/bin/sh
+
+#################################################################################
+# tit pre-push hook to ensure code quality before pushing                       #
+# running this locally helps catch issues early,                                #
+# saving CI resources and reducing feedback time.                               #
+#                                                                               #
+# - verifies code formatting with `mix format`                                  #
+# - compiles the project with warnings treated as errors                        #
+# - runs the test suite                                                         #
+# - enforces test coverage thresholds via ExCoveralls                           #
+#                                                                               #
+# create a symbolic link in your local repo:                                    #
+#   ln -sf ../../scripts/git-hooks/pre-push .git/hooks/pre-push                 #
+#                                                                               #
+# ensure the target script is executable:                                       #
+#   chmod +x scripts/git-hooks/pre-push                                         #
+#################################################################################
+
+mix deps.get > /dev/null 2>&1
+
+if ! mix format --check-formatted; then
+    echo "❌ The code is not formatted. Please run 'mix format' before pushing."
+    exit 1
+fi
+echo "✅ Code is formatted correctly!"
+
+if ! MIX_ENV=test mix compile --warnings-as-errors > /dev/null 2>&1; then
+    echo "❌ There are warnings in the code. Please fix them before pushing."
+    exit 1
+fi
+echo "✅ No warnings found during compilation!"
+
+if ! MIX_ENV=test mix test > /dev/null 2>&1; then
+    echo "❌ Some tests failed. Please fix them before pushing."
+    exit 1
+fi
+echo "✅ All tests passed successfully!"
+
+if ! MIX_ENV=test mix coveralls.html --raise > /dev/null 2>&1; then
+    echo "❌ Test coverage requirements not met. Please improve coverage before pushing."
+    exit 1
+fi
+echo "✅ Test coverage passed! (ExCoveralls)"
+
+echo "🎉 All checks passed successfully! Ready to push! 😊"
+exit 0
