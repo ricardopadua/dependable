@@ -1,0 +1,62 @@
+#!/usr/bin/sh
+
+#################################################################################
+# tit commit-msg hook to enforce Conventional Commits and message quality       #
+# helps keep a clean and meaningful Git history                                	#
+#                                                                               #
+# - validates the commit message follows Conventional Commits                  	#
+# - limits subject (first line) to 72 characters                                #
+# - appends a standard emoji based on commit type if not present               	#
+#                                                                               #
+# create a symbolic link in your local repo:                                   	#
+#   ln -sf ../../scripts/git-hooks/commit-msg .git/hooks/commit-msg            	#
+#                                                                               #
+# ensure the target script is executable:                                      	#
+#   chmod +x scripts/git-hooks/commit-msg                                      	#
+#################################################################################
+
+COMMIT_MSG_FILE="$1"
+HEAD_LINE="$(head -n1 "$COMMIT_MSG_FILE")"
+BODY_LINES=$(tail -n +2 "$COMMIT_MSG_FILE")
+
+# Conventional commit pattern
+PATTERN="^(feat|fix|chore|docs|style|refactor|test|perf|ci|build|revert)(\([a-z0-9_\-]+\))?\: .+"
+
+# Emojis por tipo
+emoji() {
+  case "$1" in
+    feat) echo "✨" ;;
+    fix) echo "🐛" ;;
+    chore) echo "🔧" ;;
+    docs) echo "📝" ;;
+    style) echo "🎨" ;;
+    refactor) echo "♻️" ;;
+    test) echo "✅" ;;
+    perf) echo "⚡" ;;
+    ci) echo "🤖" ;;
+    build) echo "🏗️" ;;
+    revert) echo "⏪" ;;
+    *) echo "" ;;
+  esac
+}
+
+if ! echo "$HEAD_LINE" | grep -Eq "$PATTERN"; then
+  echo "❌ Commit message must follow Conventional Commits."
+  echo "   Example: feat(auth): add login endpoint"
+  exit 1
+fi
+
+if [ "${#HEAD_LINE}" -gt 72 ]; then
+  echo "❌ First line exceeds 72 characters."
+  exit 1
+fi
+
+TYPE=$(echo "$HEAD_LINE" | sed -E 's/^([a-z]+)(\(.+\))?:.*/\1/')
+EMOJI=$(emoji "$TYPE")
+
+if ! echo "$HEAD_LINE" | grep -q "$EMOJI"; then
+  sed -i.bak "1s/^/$EMOJI /" "$COMMIT_MSG_FILE"
+fi
+
+echo "✅ Commit message is valid!"
+exit 0
