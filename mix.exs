@@ -64,7 +64,12 @@ defmodule Dependable.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:cloak_ecto, "~> 1.3"},
       {:oban, "~> 2.19.2"},
-      {:jason, "~> 1.4"}
+      {:jason, "~> 1.4"},
+      {:telemetry_metrics, "~> 1.0"},
+      {:telemetry_poller, "~> 1.0"},
+      {:opentelemetry, "~> 1.5"},
+      {:opentelemetry_api, "~> 1.4"},
+      {:opentelemetry_exporter, "~> 1.8"}
     ]
   end
 
