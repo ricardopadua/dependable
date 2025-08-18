@@ -63,7 +63,7 @@ defmodule Dependable.MixProject do
       {:ecto_sql, "~> 3.10"},
       {:postgrex, ">= 0.0.0"},
       {:cloak_ecto, "~> 1.3"},
-      {:oban, "~> 2.19.2"},
+      {:oban, "~> 2.20.1"},
       {:jason, "~> 1.4"},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
